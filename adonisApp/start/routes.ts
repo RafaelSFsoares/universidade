@@ -17,7 +17,8 @@ router
     router.post('aluno/cadastraAluno', [AlunoController, 'create'])
     router.put('aluno/updateAluno', [AlunoController, 'update'])
     router.delete('aluno/deleteAluno', [AlunoController, 'delete'])
-
+    // router.post('aluno/listarAlunosSala', [AlunoController, 'listarSalas'])
+    
     //PROFESSOR
     router.post('professor/consultaProfessor', [ProfessorController, 'show'])
     router.post('professor/cadastraProfessor', [ProfessorController, 'create'])
