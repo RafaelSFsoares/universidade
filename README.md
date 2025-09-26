@@ -65,41 +65,44 @@ API disponível em:
 
 
 📚 Rotas principais
-Alunos
 
-POST /alunos → Cadastrar aluno
+Todas as rotas estão sob o prefixo /api.
 
-GET /alunos → Listar alunos
+👨‍🎓 Alunos
 
-GET /alunos/:id → Buscar aluno específico
+POST /api/aluno/consultaAluno → Consultar aluno (show)
 
-PUT /alunos/:id → Atualizar aluno
+POST /api/aluno/cadastraAluno → Cadastrar aluno (create)
 
-DELETE /alunos/:id → Remover aluno
+PUT /api/aluno/updateAluno → Atualizar aluno (update)
 
-Professores
+DELETE /api/aluno/deleteAluno → Deletar aluno (delete)
 
-POST /professores → Cadastrar professor
+👨‍🏫 Professores
 
-GET /professores → Listar professores
+POST /api/professor/consultaProfessor → Consultar professor (show)
 
-GET /professores/:id → Buscar professor específico
+POST /api/professor/cadastraProfessor → Cadastrar professor (create)
 
-PUT /professores/:id → Atualizar professor
+PUT /api/professor/updateProfessor → Atualizar professor (update)
 
-DELETE /professores/:id → Remover professor
+DELETE /api/professor/deleteProfessor → Deletar professor (delete)
 
-Salas
+🏫 Salas
 
-POST /salas → Criar sala
+POST /api/salas/AlunoConsultaSala → Consultar sala do aluno (consultaSala)
 
-GET /salas → Listar salas
+POST /api/salas/criaSala → Criar sala (criaSala)
 
-GET /salas/:id → Buscar sala específica
+POST /api/salas/alocarAluno → Alocar aluno na sala (alocarAluno)
 
-PUT /salas/:id → Atualizar sala
+PUT /api/salas/updateSala → Atualizar sala (updateSala)
 
-DELETE /salas/:id → Remover sala
+DELETE /api/salas/deleteSala → Deletar sala (deleteSala)
+
+DELETE /api/salas/removerAlunoSala → Remover aluno da sala (removerAlunoSala)
+
+POST /api/salas/listarAlunosSala → Listar alunos da sala (listarAlunosSala)
 
 (as regras de negócio incluem validação de capacidade, disponibilidade e vínculo de alunos)
 
