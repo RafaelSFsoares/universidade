@@ -31,7 +31,7 @@ export default class SalasController {
 
     const sala = await Sala.create(rest)
 
-    return response.ok({ mensagem: `Sala ${data.numero} criada com sucesso!` })
+    return response.ok({ data: `Sala ${data.numero} criada com sucesso!` })
   }
 
   // RF10
@@ -67,7 +67,7 @@ export default class SalasController {
     sala.merge(rest)
     await sala.save()
 
-    return response.ok({ mensagem: 'Sala editada com sucesso!' })
+    return response.ok({ data: 'Sala editada com sucesso!' })
   }
 
   // RF11
@@ -92,7 +92,7 @@ export default class SalasController {
     sala.merge(rest)
     await sala.delete()
 
-    return response.ok({ message: 'Sala removida com sucesso' })
+    return response.ok({ data: 'Sala removida com sucesso' })
   }
 
   // RF12
@@ -118,7 +118,7 @@ export default class SalasController {
       })),
     }
 
-    return resultado
+    return response.ok({ data: resultado })
   }
 
   // RF13
@@ -140,7 +140,7 @@ export default class SalasController {
 
     //RN05: apenas o professor criador pode alocar
     if (sala.nomeProfessor !== professor.nome) {
-      return response.forbidden({ error: 'Apenas o professor criador pode alocar alunos' })
+      return response.forbidden({ error: 'Apenas o professor responsável pela sala pode alocar alunos' })
     }
 
     //RN04: verifica capacidade da sala
@@ -149,8 +149,13 @@ export default class SalasController {
         $extras: { total },
       },
     ] = await sala.related('alunos').query().count('* as total')
-    if (Number(total) >= sala.capacidade) {
-      return response.badRequest({ error: 'Sala já atingiu a capacidade máxima' })
+    if (Number(total) >= sala.capacidade || !sala.disponibilidade) {
+      return response.badRequest({
+        error:
+          Number(total) >= sala.capacidade
+            ? 'Sala já atingiu a capacidade máxima'
+            : 'Sala indisponível para alocação de alunos',
+      })
     }
 
     //Verifica aluno
@@ -168,7 +173,7 @@ export default class SalasController {
       .where('sala_id', idSala) // apenas na sala específica
       .andWhere('aluno_id', aluno.id)
       .first()
-    
+
     if (alunoJaAlocado) {
       return response.badRequest({ error: 'Aluno já alocado nesta sala' })
     }
@@ -176,33 +181,72 @@ export default class SalasController {
     //Aloca aluno
     await sala.related('alunos').attach([aluno.id])
 
-    return response.ok({ message: 'Aluno alocado com sucesso' })
+    return response.ok({ data: 'Aluno alocado com sucesso' })
   }
 
-  //   // RF14
-  //   async removerAluno({ params, request, response }:any) {
-  //     const { alunoId, professorId } = request.only(['alunoId', 'professorId'])
+  // RF14
+  async removerAlunoSala({ request, response }: any) {
+    const { id, cpf, idSala, senha, alunoId, professorId } = request.only([
+      'id',
+      'cpf',
+      'senha',
+      'idSala',
+      'alunoId',
+      'professorId',
+    ])
 
-  //     const sala = await Sala.find(params.id)
-  //     if (!sala) return response.notFound({ error: 'Sala não encontrada' })
+    //Verifica professor
+    const professor = await Professores.findBy('cpf', cpf)
+    if (!professor) {
+      return response.notFound({ error: `Professor não encontrado para o CPF: ${cpf}` })
+    }
 
-  //     if (sala.professorId !== professorId) {
-  //       return response.forbidden({ error: 'Apenas o professor criador pode remover alunos' })
-  //     }
+    const sala = await Sala.find(idSala)
+    if (!sala) return response.notFound({ error: 'Sala não encontrada' })
 
-  //     await sala.related('alunos').detach([alunoId])
-  //     return { message: 'Aluno removido da sala com sucesso' }
-  //   }
+    if (sala.professorId !== professorId) {
+      return response.forbidden({ error: 'Apenas o professor criador pode remover alunos' })
+    }
 
-  //   // RF15
-  //   async listarAlunos({ params, response }:any) {
-  //     const sala = await Sala.query()
-  //       .where('id', params.id)
-  //       .preload('alunos')
-  //       .first()
+    await sala.related('alunos').detach([alunoId])
+    return { data: `Aluno  removido da sala com sucesso` }
+  }
 
-  //     if (!sala) return response.notFound({ error: 'Sala não encontrada' })
+  // RF15
+  async listarAlunosSala({ request, response }: any) {
+    const { id, cpf, idSala, senha } = request.only(['id', 'cpf', 'senha', 'idSala'])
+    //Verifica professor
+    const professor = await Professores.findBy('cpf', cpf)
+    if (!professor) {
+      return response.notFound({ error: `Professor não encontrado para o CPF: ${cpf}` })
+    }
 
-  //     return sala.alunos;
-  //   }
+    // Busca a sala pelo ID e já preloads os alunos
+    const sala = await Sala.query()
+      .where('id', idSala)
+      .preload('alunos', (aQuery) => {
+        aQuery.select('id', 'nome', 'email', 'matricula', 'cpf', 'data_nascimento')
+      })
+      .firstOrFail()
+
+    // Monta o resultado no formato desejado
+    const resultado = {
+      id: sala.id,
+      numero: sala.numero,
+      nomeProfessor: sala.nomeProfessor,
+      descricao: sala.descricao,
+      alunos: sala.alunos.map((aluno: any) => ({
+        id: aluno.id,
+        nome: aluno.nome,
+        email: aluno.email,
+        matricula: aluno.matricula,
+        cpf: aluno.cpf,
+        dataNascimento: aluno.dataNascimento, // já vem como Date/DateTime
+      })),
+    }
+
+    if (!sala) return response.notFound({ error: 'Sala não encontrada' })
+
+    return response.ok({ data: resultado })
+  }
 }

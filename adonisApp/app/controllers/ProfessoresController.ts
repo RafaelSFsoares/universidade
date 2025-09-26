@@ -1,6 +1,4 @@
 import Professores from '../models/professores.js'
-// import Salas from '../models/sala.js'
-// import hash from '@adonisjs/core/services/hash'
 import { accountValidator, loginValidator } from '../validators/validators.js'
 import { insertFormat,crudFormat } from '../validators/helpers.js'
 
@@ -14,24 +12,24 @@ export default class ProfessoresController {
   
 
     await Professores.create(professor)
-    return response.ok({ mensagem: 'Conta criada com sucesso!' });
+    return response.ok({ data: 'Conta criada com sucesso!' });
    
   }
 
   // RF06
   async update({ request, response }: any) {
-    const data = request.only(['cpf', 'senha', 'nomeprofessor', 'email', 'dataNascimento']);
+    const data = request.only(['cpf', 'senha', 'nome', 'email', 'dataNascimento']);
     const professor = await Professores.findBy('cpf', data.cpf);
 
     if (!professor) return response.notFound({ error: 'Professor não encontrado' });
     this.validator = await request.validate({ schema: loginValidator });
 
     const format = await crudFormat(data,professor);
-  
     professor.merge(format);
+
     await professor.save();
 
-    return response.ok({ mensagem: 'Cadastro Atualizado com sucesso!' });
+    return response.ok({ data: 'Cadastro Atualizado com sucesso!' });
   }
 
   // RF07
@@ -47,7 +45,7 @@ export default class ProfessoresController {
     professor.merge(format);
     await professor.delete();
 
-    return response.ok({ mensagem: `Professor ${professor.nome}, portador do Cpf:${professor.cpf} removido com sucesso!` });
+    return response.ok({ data: `Professor ${professor.nome}, portador do Cpf:${professor.cpf} removido com sucesso!` });
   }
 
 
@@ -66,6 +64,6 @@ export default class ProfessoresController {
       
       rest.dataNascimento = rest.dataNascimento.toISOString().slice(0, 10);
   
-      return rest;
+      return response.ok({data:rest});
     };
 }

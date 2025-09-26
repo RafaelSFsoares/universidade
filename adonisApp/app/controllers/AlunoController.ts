@@ -1,11 +1,10 @@
 import Aluno from '../models/aluno.js'
-// import Salas from '../models/sala.js'
 import hash from '@adonisjs/core/services/hash'
 import { accountValidator, loginValidator } from '../validators/validators.js'
 
 export default class AlunosController {
   public validator: any
- 
+
   public async create({ request, response }: any) {
     const data = await request.validate({ schema: accountValidator })
 
@@ -20,7 +19,7 @@ export default class AlunosController {
       dataNascimento: new Date(data.dataNascimento),
     })
 
-    return response.ok({ mensagem: 'Conta criada com sucesso!' })
+    return response.ok({ data: 'Conta criada com sucesso!' })
   }
 
   // RF02
@@ -29,7 +28,6 @@ export default class AlunosController {
     const aluno = await Aluno.findBy('cpf', data.cpf)
 
     this.validator = await request.validate({ schema: loginValidator })
-
 
     if (!aluno) return response.notFound({ error: 'Aluno não encontrado' })
 
@@ -41,12 +39,12 @@ export default class AlunosController {
     }
 
     // Atualiza os outros campos
-    const { cpf, senha, ...rest } = data;
+    const { cpf, senha, ...rest } = data
 
-    aluno.merge(rest);
-    
-    await aluno.save();
-    return response.ok({ mensagem: 'Cadastro Atualizado com sucesso!' })
+    aluno.merge(rest)
+
+    await aluno.save()
+    return response.ok({ data: 'Cadastro Atualizado com sucesso!' })
   }
 
   // RF03
@@ -66,7 +64,7 @@ export default class AlunosController {
     }
 
     await aluno.delete()
-    return { message: `Aluno ${aluno.nome}, portador do Cpf:${aluno.cpf} removido com sucesso!` }
+    return { data: `Aluno ${aluno.nome}, portador do Cpf:${aluno.cpf} removido com sucesso!` }
   }
 
   // RF04
@@ -79,32 +77,33 @@ export default class AlunosController {
 
     if (!aluno) return response.notFound({ error: 'Aluno não encontrado' })
 
+    const { id, createdAt, updatedAt, senha, ...rest } = aluno.$attributes
 
-    const { id, createdAt, updatedAt,  senha, ...rest } = aluno.$attributes;
-    
-    rest.dataNascimento = rest.dataNascimento.toISOString().slice(0, 10);
+    rest.dataNascimento = rest.dataNascimento.toISOString().slice(0, 10)
 
-    return rest;
-  };
+    return { data: rest }
+  }
 
   //   // RF16
-    async listarSalas({ request, response }:any) {
-      const data = request.only(['nome', 'email', 'cpf', 'matricula', 'data_nascimento'])
-      const aluno = await Aluno.query()
-        .where('id', request.id)
-        .preload('salas', (salaQuery) => {
-          salaQuery.preload('professor')
-        })
-        .first()
+  async listarSalas({ request, response }: any) {
+    const data = request.only(['nome', 'email', 'cpf', 'matricula', 'data_nascimento'])
+    const aluno = await Aluno.query()
+      .where('id', request.id)
+      .preload('salas', (salaQuery) => {
+        salaQuery.preload('professor')
+      })
+      .first()
 
-      if (!aluno) return response.notFound({ error: 'Aluno não encontrado' })
+    if (!aluno) return response.notFound({ error: 'Aluno não encontrado' })
 
-      return {
+    return {
+      data: {
         nome: aluno.nome,
         salas: aluno.salas.map((sala: { numero: any; professor: { nome: any } }) => ({
           numero: sala.numero,
           professor: sala.professor?.nome,
         })),
-      }
+      },
     }
+  }
 }

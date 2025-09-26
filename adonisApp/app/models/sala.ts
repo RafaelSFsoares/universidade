@@ -18,14 +18,14 @@ export default class Sala extends BaseModel {
   @column.dateTime({ autoCreate: true, autoUpdate: true, serializeAs: null })
   declare updatedAt: DateTime
 
-  // @belongsTo(() => Professor)
-  // declare professor: any
+  @belongsTo(() => Professor)
+  declare nome: any
 
-   @belongsTo(() => Professor, {
+  @belongsTo(() => Professor, {
     foreignKey: 'professorId',
   })
   declare professor: any
-  
+
   @manyToMany(() => Aluno, { pivotTable: 'aluno_sala' })
   declare alunos: any
 }
