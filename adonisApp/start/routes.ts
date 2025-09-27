@@ -18,7 +18,7 @@ router
     router.put('aluno/updateAluno', [AlunoController, 'update'])
     router.delete('aluno/deleteAluno', [AlunoController, 'delete'])
     // router.post('aluno/listarAlunosSala', [AlunoController, 'listarSalas'])
-    
+
     //PROFESSOR
     router.post('professor/consultaProfessor', [ProfessorController, 'show'])
     router.post('professor/cadastraProfessor', [ProfessorController, 'create'])
@@ -26,12 +26,14 @@ router
     router.delete('professor/deleteProfessor', [ProfessorController, 'delete'])
 
     //SALAS
-    router.post('salas/AlunoConsultaSala', [SalasController, 'consultaSala'])
     router.post('salas/criaSala', [SalasController, 'criaSala'])
     router.post('salas/alocarAluno', [SalasController, 'alocarAluno'])
     router.put('salas/updateSala', [SalasController, 'updateSala'])
     router.delete('salas/deleteSala', [SalasController, 'deleteSala'])
     router.delete('salas/removerAlunoSala', [SalasController, 'removerAlunoSala'])
+
+
+    router.post('salas/AlunoConsultaSala', [SalasController, 'consultaSala'])
     router.post('salas/listarAlunosSala', [SalasController, 'listarAlunosSala'])
   })
   .prefix('/api')

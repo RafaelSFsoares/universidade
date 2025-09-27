@@ -16,7 +16,7 @@ export default class ProfessorService {
   }
 
   async insereProfessor(data: IProfessor) {
-    console.log(' data')
+
     const cpfNumbers = data.cpf.replace(/\D/g, '')
     const matricula = cpfNumbers.substring(0, 5)
     const senhaHash = await hash.make(data.senha)

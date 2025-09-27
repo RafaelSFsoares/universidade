@@ -38,4 +38,8 @@ export default class AlunoRepository {
     await aluno.merge(data)
     return await aluno.delete()
   }
+
+  public async buscaAlunoById(data:any){
+    return await Aluno.findBy('matricula', data.matricula_aluno)
+  }
 }

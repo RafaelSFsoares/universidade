@@ -1,4 +1,3 @@
-import { DateTime } from 'luxon'
 
 interface IProfessor {
   nome: string

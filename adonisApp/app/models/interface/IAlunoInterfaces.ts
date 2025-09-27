@@ -1,5 +1,3 @@
-import { DateTime } from 'luxon'
-
 interface IAluno {
   nome: string
   email: string
