@@ -1,69 +1,47 @@
-import Professores from '../models/professores.js'
 import { accountValidator, loginValidator } from '../validators/validators.js'
-import { insertFormat,crudFormat } from '../validators/helpers.js'
+import ProfessorService from '../service.ts/professorService.js'
 
 export default class ProfessoresController {
   public validator: any
+  private professorService = new ProfessorService()
   // RF05
   public async create({ request, response }: any) {
-    const data = await request.validate({ schema: accountValidator });
+    const data = await request.validate({ schema: accountValidator })
 
-    const professor = await insertFormat(data)
-  
+    const professor = await this.professorService.insereProfessor(data)
 
-    await Professores.create(professor)
-    return response.ok({ data: 'Conta criada com sucesso!' });
-   
+    return response.ok({ data: 'Conta criada com sucesso!' })
   }
 
   // RF06
   async update({ request, response }: any) {
-    const data = request.only(['cpf', 'senha', 'nome', 'email', 'dataNascimento']);
-    const professor = await Professores.findBy('cpf', data.cpf);
+    const data = request.only(['cpf', 'senha', 'nome', 'email', 'dataNascimento'])
 
-    if (!professor) return response.notFound({ error: 'Professor não encontrado' });
-    this.validator = await request.validate({ schema: loginValidator });
+    this.validator = await request.validate({ schema: loginValidator })
 
-    const format = await crudFormat(data,professor);
-    professor.merge(format);
+    const professor = await this.professorService.atualizaProfessor(data)
 
-    await professor.save();
-
-    return response.ok({ data: 'Cadastro Atualizado com sucesso!' });
+    return response.ok({ data: 'Cadastro Atualizado com sucesso!' })
   }
 
   // RF07
   async delete({ request, response }: any) {
-    const data = request.only(['cpf', 'senha']);
-    const professor = await Professores.findBy('cpf', data.cpf);
-   
-    if (!professor) return response.notFound({ error: 'Professor não encontrado' });
-    this.validator = await request.validate({ schema: loginValidator });
+    const data = request.only(['cpf', 'senha'])
+    this.validator = await request.validate({ schema: loginValidator })
+    
+    const professor = await this.professorService.deleteProfessor(data)
 
-    const format = await crudFormat(data,professor);
-  
-    professor.merge(format);
-    await professor.delete();
-
-    return response.ok({ data: `Professor ${professor.nome}, portador do Cpf:${professor.cpf} removido com sucesso!` });
+    return response.ok({
+      data: `Professor removido com sucesso!`,
+    })
   }
-
 
   // RF08
   async show({ request, response }: any) {
-      const data = request.only(['nome', 'email', 'cpf', 'matricula', 'data_nascimento'])
-  
-      this.validator = await request.validate({ schema: loginValidator })
-  
-      const professor = await Professores.findBy('cpf', data.cpf)
-  
-      if (!professor) return response.notFound({ error: 'Professor não encontrado' })
-  
-  
-      const { id, createdAt, updatedAt,  senha, ...rest } = professor.$attributes;
-      
-      rest.dataNascimento = rest.dataNascimento.toISOString().slice(0, 10);
-  
-      return response.ok({data:rest});
-    };
+    const data = request.only(['cpf'])
+
+    this.validator = await request.validate({ schema: loginValidator })
+
+    return await this.professorService.listar(data)
+  }
 }
